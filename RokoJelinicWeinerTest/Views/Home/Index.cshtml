@@ -1,0 +1,187 @@
+﻿@model IEnumerable<RokoJelinicWeinerTest.Models.PartnersModel>
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<form method="get" asp-controller="Partners" asp-action="Search" class="mb-3">
+    <div class="row">
+        <div class="col-md-4">
+            <select name="category" class="form-select">
+                <option value="FullName">Full Name</option>
+                <option value="PartnerNumber">Partner Number</option>
+                <option value="CroatianPIN">Croatian PIN</option>
+                <option value="PartnerTypeId">Partner Type ID</option>
+                <option value="IsForeign">Is Foreign</option>
+                <option value="Gender">Gender</option>
+            </select>
+        </div>
+        <div class="col-md-6">
+            
+            <div id="searchTermContainer">
+                
+            </div>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+    </div>
+</form>
+
+<script>
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const selectedCategory = document.querySelector('select[name="category"]').value;
+        const searchTermContainer = document.getElementById('searchTermContainer');
+        updateSearchField(selectedCategory, searchTermContainer);
+    });
+
+    document.querySelector('select[name="category"]').addEventListener('change', function () {
+        const selectedCategory = this.value;
+        const searchTermContainer = document.getElementById('searchTermContainer');
+        updateSearchField(selectedCategory, searchTermContainer);
+    });
+
+    function updateSearchField(selectedCategory, searchTermContainer) {
+        searchTermContainer.innerHTML = '';
+
+
+        if (selectedCategory === 'Gender') {
+
+            const genderDropdown = document.createElement('select');
+            genderDropdown.name = 'searchTerm';
+            genderDropdown.classList.add('form-select');
+            const options = ['M', 'F', 'O'];
+            options.forEach(option => {
+                const optionElement = document.createElement('option');
+                optionElement.value = option;
+                optionElement.textContent = option;
+                genderDropdown.appendChild(optionElement);
+            });
+            searchTermContainer.appendChild(genderDropdown);
+        } else if (selectedCategory === 'IsForeign') {
+
+            const isForeignDropdown = document.createElement('select');
+            isForeignDropdown.name = 'searchTerm';
+            isForeignDropdown.classList.add('form-select');
+            const options = ['True', 'False'];
+            options.forEach(option => {
+                const optionElement = document.createElement('option');
+                optionElement.value = option;
+                optionElement.textContent = option;
+                isForeignDropdown.appendChild(optionElement);
+            });
+            searchTermContainer.appendChild(isForeignDropdown);
+        } else if (selectedCategory === 'PartnerTypeId') {
+
+            const partnerTypeId = document.createElement('select');
+            partnerTypeId.name = 'searchTerm';
+            partnerTypeId.classList.add('form-select');
+            const options = [1, 2];
+            options.forEach(option => {
+                const optionElement = document.createElement('option');
+                optionElement.value = option;
+                optionElement.textContent = option;
+                partnerTypeId.appendChild(optionElement);
+            });
+            searchTermContainer.appendChild(partnerTypeId);
+        } else {
+
+            const inputField = document.createElement('input');
+            inputField.type = 'text';
+            inputField.name = 'searchTerm';
+            inputField.classList.add('form-control');
+            inputField.placeholder = 'Enter search term';
+            searchTermContainer.appendChild(inputField);
+        }
+
+    }
+</script>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Full Name</th>
+            <th>Partner Number</th>
+            <th>Croatian PIN</th>
+            <th>Partner Type ID</th>
+            <th>Created At</th>
+            <th>Is Foreign</th>
+            <th>Gender</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            var isNewUser = (DateTime.UtcNow - item.CreatedAtUtc).TotalSeconds <= 30;
+            var hasFiveOrMorePolicies = item.PartnersPolicies.Count >= 5;
+            var totalPolicyPrice = item.PartnersPolicies.Sum(policy => policy.Policies?.PolicyPrice ?? 0);
+
+            var hasPolicyWorth5000OrMore = (totalPolicyPrice >= 5000);
+            var shouldHighlight = hasFiveOrMorePolicies || hasPolicyWorth5000OrMore;
+
+
+            <tr class="partner-row" style="@(isNewUser ? "font-weight:bold" : "")" data-partner-id="@item.Id">
+                <td>@(shouldHighlight ? "*" : "")@Html.DisplayFor(modelItem => item.FirstName) @Html.DisplayFor(modelItem => item.LastName)</td>
+                <td>@Html.DisplayFor(modelItem => item.PartnerNumber)</td>
+                <td>@Html.DisplayFor(modelItem => item.CroatianPIN)</td>
+                <td>@Html.DisplayFor(modelItem => item.PartnerTypeId)</td>
+                <td>@Html.DisplayFor(modelItem => item.CreatedAtUtc)</td>
+                <td>@Html.DisplayFor(modelItem => item.IsForeign)</td>
+                <td>@Html.DisplayFor(modelItem => item.Gender)</td>
+                @if (SignInManager.IsSignedIn(User))
+                {
+                <td>
+                    <a asp-action="Edit" asp-controller="Partners" asp-route-id="@item.Id">Edit</a> |
+                    <a asp-action="Delete" asp-controller="Partners" asp-route-id="@item.Id">Delete</a>
+                </td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>
+
+<script>
+    setTimeout(function () {
+        $('.partner-row').css('font-weight', 'normal');
+    }, 2000);
+</script>
+@if (SignInManager.IsSignedIn(User))
+{
+    <div class="modal fade" id="partnerModal" tabindex="-1" role="dialog" aria-labelledby="partnerModalLabel" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="partnerModalLabel">Partner Details</h5>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">X</button>
+                </div>
+                <div class="modal-body">
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section scripts {
+    <script>
+        $(function () {
+            $('.partner-row').on('click', function () {
+                var partnerId = $(this).data('partner-id');
+                var $clickedRow = $(this);
+
+                $.get('/Partners/Details/' + partnerId, function (data) {
+                    $('#partnerModal .modal-body').html(data);
+                    $('#partnerModal').modal('show');
+                }).fail(function () {
+                    console.error('Failed to load partner details.');
+                });
+            });
+
+           
+        });
+    </script>
+}

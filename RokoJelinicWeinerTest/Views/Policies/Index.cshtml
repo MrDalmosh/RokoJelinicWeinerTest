@@ -1,0 +1,119 @@
+﻿@model IEnumerable<RokoJelinicWeinerTest.Models.PoliciesModel>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<form method="get" asp-controller="Policies" asp-action="Search" class="mb-3">
+    <div class="row">
+        <div class="col-md-4">
+            <select name="category" class="form-select">
+                <option value="PolicyNumber">Policy Number</option>
+                <option value="PolicyPrice">Policy Price</option>
+            </select>
+        </div>
+        <div class="col-md-6">
+
+            <div id="searchTermContainer">
+
+            </div>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+    </div>
+</form>
+
+<script>
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const selectedCategory = document.querySelector('select[name="category"]').value;
+        const searchTermContainer = document.getElementById('searchTermContainer');
+        updateSearchField(selectedCategory, searchTermContainer);
+    });
+
+    document.querySelector('select[name="category"]').addEventListener('change', function () {
+        const selectedCategory = this.value;
+        const searchTermContainer = document.getElementById('searchTermContainer');
+        updateSearchField(selectedCategory, searchTermContainer);
+    });
+
+    function updateSearchField(selectedCategory, searchTermContainer) {
+        searchTermContainer.innerHTML = '';
+
+
+        if (selectedCategory === 'PolicyPrice') {
+
+            const policyPrice = document.createElement('input');
+            policyPrice.type = 'number';
+            policyPrice.step = '.01';
+            policyPrice.name = 'searchTerm';
+            policyPrice.classList.add('form-control');
+            policyPrice.placeholder = 'Enter price term';
+            searchTermContainer.appendChild(policyPrice);
+        } else {
+
+            const inputField = document.createElement('input');
+            inputField.type = 'text';
+            inputField.name = 'searchTerm';
+            inputField.classList.add('form-control');
+            inputField.placeholder = 'Enter search term';
+            searchTermContainer.appendChild(inputField);
+        }
+
+    }
+</script>
+
+<h1>List of all policies</h1>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Policy Number</th>
+            <th>Policy Price</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr class="policy-row" data-policy-number="@item.PolicyNumber">
+                <td>@Html.DisplayFor(modelItem => item.PolicyNumber)</td>
+                <td>@Html.DisplayFor(modelItem => item.PolicyPrice)</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.PolicyNumber">Edit</a> |
+                    <a asp-action="Delete" asp-route-id="@item.PolicyNumber">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div class="modal fade" id="policyModal" tabindex="-1" role="dialog" aria-labelledby="policyModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="policyModalLabel">Policy Details</h5>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">X</button>
+            </div>
+            <div class="modal-body">
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $(function () {
+            $('.policy-row').on('click', function () {
+                var policyNumber = $(this).data('policy-number');
+
+                $.get('/Policies/Details/' + policyNumber, function (data) {
+                    $('#policyModal .modal-body').html(data);
+                    $('#policyModal').modal('show');
+                }).fail(function () {
+                    console.error('Failed to load policy details.');
+                });
+            });
+        });
+    </script>
+}

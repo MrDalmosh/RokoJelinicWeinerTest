@@ -1,0 +1,49 @@
+﻿@model RokoJelinicWeinerTest.Models.PoliciesModel
+
+@{
+    Layout = "_ModalLayout";
+    ViewData["Title"] = "Policy Details";
+}
+
+<div>
+    <dl class="row">
+        <dt class="col-sm-2">
+            Policy Number
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.PolicyNumber)
+        </dd>
+        <dt class = "col-sm-2">
+            Policy Price
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.PolicyPrice)
+        </dd>
+    </dl>
+</div>
+<div>
+    <h4>Partners</h4>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Full Name</th>
+                <th>Address</th>
+                <th>Partner Type ID</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var partner in Model.PartnersPolicies)
+            {
+                <tr>
+                    <td>@partner.Partner.FirstName @partner.Partner.LastName</td>
+                    <td>@partner.Partner.Address</td>
+                    <td>@partner.Partner.PartnerTypeId</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model?.PolicyNumber">Edit</a> |
+    <a asp-action="Delete" asp-route-id="@Model?.PolicyNumber">Delete</a>
+</div>

@@ -1,0 +1,110 @@
+﻿@model RokoJelinicWeinerTest.Models.PartnersModel
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+
+<h4>PartnersModel</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            @{
+                var errors = ViewData.ModelState.Values.SelectMany(v => v.Errors);
+                if (errors.Any())
+                {
+                    <div class="alert alert-danger">
+                        <ul>
+                            @foreach (var error in errors)
+                            {
+                                <li>@error.ErrorMessage</li>
+                            }
+                        </ul>
+                    </div>
+                }
+            }
+            
+           
+            <div class="form-group">
+                <label asp-for="FirstName" class="control-label">First Name</label>
+                <input asp-for="FirstName" class="form-control" autocomplete="off" />
+                <span asp-validation-for="FirstName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="LastName" class="control-label">Last Name</label>
+                <input asp-for="LastName" class="form-control" autocomplete="off" />
+                <span asp-validation-for="LastName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Address" class="control-label"></label>
+                <input asp-for="Address" class="form-control" autocomplete="off" />
+                <span asp-validation-for="Address" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="PartnerNumber" class="control-label">Partner Number</label>
+                <input asp-for="PartnerNumber" class="form-control" autocomplete="off" pattern="\d{20}" />
+                <span asp-validation-for="PartnerNumber" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="CroatianPIN" class="control-label">Croatian PIN</label>
+                <input asp-for="CroatianPIN" class="form-control" autocomplete="off" />
+                <span asp-validation-for="CroatianPIN" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="PartnerTypeId" class="control-label">Partner Type</label>
+                <select asp-for="PartnerTypeId" class="form-control">
+                    <option value="1">Personal</option>
+                    <option value="2">Legal</option>
+                </select>
+                <span asp-validation-for="PartnerTypeId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="CreatedAtUtc" class="control-label">Created At</label>
+                <input asp-for="CreatedAtUtc" type="datetime" class="form-control" readonly value="@DateTime.UtcNow" />
+                <span asp-validation-for="CreatedAtUtc" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="CreateByUser" class="control-label">Create By User</label>
+                <input asp-for="CreateByUser" class="form-control" readonly value="@(!string.IsNullOrEmpty(User.Identity?.Name) ? User.Identity.Name : "Uknown")" />
+                <span asp-validation-for="CreateByUser" class="text-danger"></span>
+            </div>
+            <div class="form-group form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="IsForeign" /> @Html.DisplayNameFor(model => model.IsForeign)
+                </label>
+            </div>
+            <div class="form-group">
+                <label asp-for="ExternalCode" class="control-label">External Code</label>
+                <input asp-for="ExternalCode" class="form-control" />
+                <span asp-validation-for="ExternalCode" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Gender" class="control-label">Gender</label>
+                <select asp-for="Gender" class="form-control">
+                    <option value="">Select Gender</option>
+                    <option value="M">Male</option>
+                    <option value="F">Female</option>
+                    <option value="O">Other</option>
+                </select>
+                <span asp-validation-for="Gender" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index" asp-controller="Home">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
